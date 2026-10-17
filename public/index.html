@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anushka — Discord Bot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d14;
+      --surface:   #13131f;
+      --card:      #1a1a2e;
+      --border:    #2a2a45;
+      --accent:    #7c6bff;
+      --accent2:   #a78bfa;
+      --green:     #22d3a6;
+      --red:       #f87171;
+      --gold:      #fbbf24;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* --- ambient glow blobs --- */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; left: -100px; }
+    .blob-2 { width: 500px; height: 500px; background: #ec4899; bottom: -100px; right: -100px; }
+
+    /* --- layout --- */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 5rem;
+    }
+
+    /* --- hero --- */
+    .hero {
+      text-align: center;
+      padding: 5rem 0 3.5rem;
+    }
+    .avatar {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ec4899);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 0 40px rgba(124,107,255,0.45);
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(124,107,255,0.45); }
+      50%       { box-shadow: 0 0 70px rgba(124,107,255,0.75); }
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: .6rem;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: rgba(34,211,166,.12);
+      border: 1px solid rgba(34,211,166,.25);
+      color: var(--green);
+      font-size: .8rem;
+      font-weight: 600;
+      padding: .35rem .85rem;
+      border-radius: 999px;
+      letter-spacing: .05em;
+    }
+    .badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); animation: blink 1.4s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* --- stat bar --- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.4rem 1.2rem;
+      text-align: center;
+      transition: transform .2s, border-color .2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .stat-card .num {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-card .label { color: var(--muted); font-size: .8rem; margin-top: .3rem; }
+
+    /* --- section title --- */
+    .section-title {
+      font-size: 1rem; font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: 1rem;
+    }
+
+    /* --- feature grid --- */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: transform .25s, border-color .25s, box-shadow .25s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 32px rgba(124,107,255,.18);
+    }
+    .feature-icon {
+      font-size: 1.8rem; margin-bottom: .75rem;
+    }
+    .feature-card h3 { font-size: .95rem; font-weight: 600; margin-bottom: .4rem; }
+    .feature-card p  { color: var(--muted); font-size: .82rem; line-height: 1.6; }
+
+    /* --- strike ladder --- */
+    .ladder {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .ladder-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .ladder-row:last-child { border-bottom: none; }
+    .strike-badge {
+      min-width: 72px;
+      text-align: center;
+      font-size: .75rem; font-weight: 700;
+      padding: .3rem .7rem; border-radius: 8px;
+    }
+    .s1 { background: rgba(251,191,36,.12);  color: var(--gold);  border: 1px solid rgba(251,191,36,.2); }
+    .s2 { background: rgba(124,107,255,.12); color: var(--accent2); border: 1px solid rgba(124,107,255,.2); }
+    .s3 { background: rgba(251,146,60,.12);  color: #fb923c;      border: 1px solid rgba(251,146,60,.2); }
+    .s4 { background: rgba(248,113,113,.12); color: var(--red);   border: 1px solid rgba(248,113,113,.2); }
+    .s5 { background: rgba(220,38,38,.15);   color: #ef4444;      border: 1px solid rgba(220,38,38,.25); }
+
+    .ladder-row .desc { font-size: .9rem; color: var(--text); }
+    .ladder-row .subdesc { font-size: .78rem; color: var(--muted); }
+
+    /* --- commands --- */
+    .cmd-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+      gap: .6rem; margin-bottom: 2.5rem;
+    }
+    .cmd-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .5rem .9rem;
+      font-family: 'Courier New', monospace;
+      font-size: .82rem;
+      color: var(--accent2);
+      text-align: center;
+      transition: background .2s, border-color .2s;
+    }
+    .cmd-pill:hover { background: var(--card); border-color: var(--accent); }
+
+    /* --- CTA --- */
+    .cta-row {
+      display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;
+      margin-top: 3rem;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .75rem 1.6rem;
+      border-radius: 12px;
+      font-size: .95rem; font-weight: 600;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #6d56f5);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124,107,255,.4);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 30px rgba(124,107,255,.55); }
+    .btn-ghost {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { border-color: var(--accent); }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: .8rem;
+      margin-top: 4rem;
+    }
+    footer a { color: var(--accent2); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="container">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="avatar">🤖</div>
+    <h1>Anushka</h1>
+    <p>A fully autonomous Discord moderation bot — strike escalation, anti-nuke protection, music playback, and MongoDB-backed dynamic roles.</p>
+    <span class="badge">Online &amp; Operational</span>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num">4</div>
+      <div class="label">Core Modules</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">20+</div>
+      <div class="label">Commands</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">5</div>
+      <div class="label">Strike Tiers</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">60s</div>
+      <div class="label">AntiNuke Window</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <p class="section-title">Modules</p>
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <h3>Moderation</h3>
+      <p>Kick, ban, unban, timeout, untimeout, and purge — all gated behind a dynamic moderator role stored in MongoDB.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚠️</div>
+      <h3>AutoMod</h3>
+      <p>Warn users and watch the bot automatically escalate through 5 punishment tiers. Full strike history stored per guild.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚨</div>
+      <h3>AntiNuke</h3>
+      <p>Passively monitors mass bans, kicks, channel & role deletions, and webhook creation. Quarantines offenders instantly.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎵</div>
+      <h3>Music</h3>
+      <p>Play, skip, queue, loop, and control volume. Powered by yt-dlp with a per-guild queue system and DJ role check.</p>
+    </div>
+  </div>
+
+  <!-- STRIKE LADDER -->
+  <p class="section-title">Strike Escalation Ladder</p>
+  <div class="ladder">
+    <div class="ladder-row">
+      <span class="strike-badge s1">Strike 1</span>
+      <div>
+        <div class="desc">📩 DM Warning</div>
+        <div class="subdesc">Official warning sent directly to the user's inbox.</div>
+      </div>
+    </div>
+    <div class="ladder-row">
+      <span class="strike-badge s2">Strike 2</span>
+      <div>
+        <div class="desc">⏱️ 15-Minute Timeout</div>
+        <div class="subdesc">Native Discord timeout — cool down period.</div>
+      </div>
+    </div>
+    <div class="ladder-row">
+      <span class="strike-badge s3">Strike 3</span>
+      <div>
+        <div class="desc">⏱️ 12-Hour Timeout</div>
+        <div class="subdesc">Severe final warning before permanent action.</div>
+      </div>
+    </div>
+    <div class="ladder-row">
+      <span class="strike-badge s4">Strike 4</span>
+      <div>
+        <div class="desc">⚔️ Server Kick</div>
+        <div class="subdesc">User is removed. They may rejoin if allowed.</div>
+      </div>
+    </div>
+    <div class="ladder-row">
+      <span class="strike-badge s5">Strike 5+</span>
+      <div>
+        <div class="desc">⛔ Permanent Ban</div>
+        <div class="subdesc">No appeal. Logged and banned permanently.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMANDS -->
+  <p class="section-title">Commands</p>
+  <div class="cmd-grid">
+    <div class="cmd-pill">!kick</div>
+    <div class="cmd-pill">!ban</div>
+    <div class="cmd-pill">!unban</div>
+    <div class="cmd-pill">!timeout</div>
+    <div class="cmd-pill">!untimeout</div>
+    <div class="cmd-pill">!purge</div>
+    <div class="cmd-pill">!warn</div>
+    <div class="cmd-pill">!strikes</div>
+    <div class="cmd-pill">!clearstrikes</div>
+    <div class="cmd-pill">!play</div>
+    <div class="cmd-pill">!skip</div>
+    <div class="cmd-pill">!pause</div>
+    <div class="cmd-pill">!resume</div>
+    <div class="cmd-pill">!stop</div>
+    <div class="cmd-pill">!queue</div>
+    <div class="cmd-pill">!loop</div>
+    <div class="cmd-pill">!volume</div>
+    <div class="cmd-pill">!setmodrole</div>
+    <div class="cmd-pill">!setmusicrole</div>
+    <div class="cmd-pill">!antinukestatus</div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-row">
+    <a href="https://github.com/fakeacct0000420-crypto/Anushka-Discord-Bot" class="btn btn-primary" target="_blank">
+      ⭐ View on GitHub
+    </a>
+    <a href="https://discord.com/api/oauth2/authorize" class="btn btn-ghost" target="_blank">
+      ➕ Add to Server
+    </a>
+  </div>
+
+  <footer>
+    <p>Built with ❤️ by fakeacct0000420-crypto · <a href="https://github.com/fakeacct0000420-crypto/Anushka-Discord-Bot">GitHub</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

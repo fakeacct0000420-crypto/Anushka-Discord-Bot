@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "name": "anushka-discord-bot",
+  "public": true,
+  "outputDirectory": "public",
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
