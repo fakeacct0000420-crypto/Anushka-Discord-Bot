@@ -232,6 +232,51 @@
     }
     .btn-ghost:hover { border-color: var(--accent); }
 
+    /* --- invite modal --- */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: min(420px, 90vw);
+      box-shadow: 0 24px 80px rgba(0,0,0,.5);
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: .4rem; }
+    .modal p  { color: var(--muted); font-size: .85rem; margin-bottom: 1.2rem; line-height: 1.6; }
+    .modal label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: .4rem; color: var(--muted); text-transform: uppercase; letter-spacing:.05em; }
+    .modal input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      color: var(--text);
+      font-size: .95rem;
+      margin-bottom: 1rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .modal input:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: .75rem; }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+    .btn-cancel { background: var(--surface); border: 1px solid var(--border); color: var(--muted); cursor: pointer; }
+    .btn-invite { background: linear-gradient(135deg,#5865f2,#4752c4); color:#fff; border:none; cursor:pointer;
+      box-shadow: 0 4px 20px rgba(88,101,242,.4); }
+    .btn-invite:hover { box-shadow: 0 8px 30px rgba(88,101,242,.55); }
+    .modal .tip { font-size:.75rem; color: var(--muted); margin-top:.75rem; }
+    .modal .tip a { color: var(--accent2); text-decoration:none; }
+
     footer {
       text-align: center;
       color: var(--muted);
@@ -371,9 +416,9 @@
     <a href="https://github.com/fakeacct0000420-crypto/Anushka-Discord-Bot" class="btn btn-primary" target="_blank">
       ⭐ View on GitHub
     </a>
-    <a href="https://discord.com/api/oauth2/authorize" class="btn btn-ghost" target="_blank">
+    <button class="btn btn-ghost" id="inviteBtn" onclick="document.getElementById('inviteModal').classList.add('open')">
       ➕ Add to Server
-    </a>
+    </button>
   </div>
 
   <footer>
@@ -381,5 +426,63 @@
   </footer>
 
 </div>
+
+<!-- INVITE MODAL -->
+<div class="modal-overlay" id="inviteModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h2>➕ Add Anushka to Your Server</h2>
+    <p>Enter your bot's <strong>Application / Client ID</strong> from the Discord Developer Portal to generate the invite link.</p>
+    <label for="clientIdInput">Client ID</label>
+    <input
+      id="clientIdInput"
+      type="text"
+      placeholder="e.g. 1234567890123456789"
+      inputmode="numeric"
+      autocomplete="off"
+    />
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="document.getElementById('inviteModal').classList.remove('open')">
+        Cancel
+      </button>
+      <button class="btn btn-invite" onclick="openInvite()">
+        🚀 Open Invite
+      </button>
+    </div>
+    <p class="tip">
+      Find your Client ID at
+      <a href="https://discord.com/developers/applications" target="_blank">discord.com/developers/applications</a>
+      → Your App → OAuth2.
+    </p>
+  </div>
+</div>
+
+<script>
+  function openInvite() {
+    const clientId = document.getElementById('clientIdInput').value.trim();
+    if (!clientId || !/^\d+$/.test(clientId)) {
+      document.getElementById('clientIdInput').style.borderColor = 'var(--red)';
+      document.getElementById('clientIdInput').placeholder = '⚠️ Enter a valid numeric Client ID';
+      return;
+    }
+    // Request all permissions needed: kick, ban, timeout, manage messages, manage roles,
+    // manage channels, view audit log, send messages, embed links, connect, speak
+    const permissions = '8'; // Administrator — change to specific perms if preferred
+    const scope = encodeURIComponent('bot applications.commands');
+    const url = `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=${scope}`;
+    document.getElementById('inviteModal').classList.remove('open');
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  // Allow Enter key to submit
+  document.getElementById('clientIdInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') openInvite();
+  });
+
+  // Reset border on input
+  document.getElementById('clientIdInput').addEventListener('input', function() {
+    this.style.borderColor = '';
+  });
+</script>
+
 </body>
 </html>
