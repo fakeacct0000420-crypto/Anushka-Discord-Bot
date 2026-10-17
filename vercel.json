@@ -1,10 +1,12 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "",
+  "buildCommand": "npm install",
   "outputDirectory": "public",
-  "installCommand": "",
+  "installCommand": "npm install",
   "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)",     "dest": "/index.html" }
   ]
 }
+
