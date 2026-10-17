@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "name": "anushka-discord-bot",
-  "public": true,
+  "framework": null,
+  "buildCommand": "",
   "outputDirectory": "public",
+  "installCommand": "",
   "routes": [
     { "src": "/(.*)", "dest": "/index.html" }
   ]
