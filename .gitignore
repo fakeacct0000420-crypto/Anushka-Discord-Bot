@@ -16,3 +16,5 @@ venv/
 env/
 node_modules/
 .vercel/
+
+.vercel

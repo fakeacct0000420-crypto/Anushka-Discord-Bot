@@ -416,9 +416,9 @@
     <a href="https://github.com/fakeacct0000420-crypto/Anushka-Discord-Bot" class="btn btn-primary" target="_blank">
       ⭐ View on GitHub
     </a>
-    <button class="btn btn-ghost" id="inviteBtn" onclick="document.getElementById('inviteModal').classList.add('open')">
+    <a href="https://discord.com/oauth2/authorize?client_id=1558027236291121163&permissions=8&scope=bot%20applications.commands" class="btn btn-ghost" id="inviteBtn" target="_blank">
       ➕ Add to Server
-    </button>
+    </a>
   </div>
 
   <footer>
@@ -431,12 +431,12 @@
 <div class="modal-overlay" id="inviteModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
     <h2>➕ Add Anushka to Your Server</h2>
-    <p>Enter your bot's <strong>Application / Client ID</strong> from the Discord Developer Portal to generate the invite link.</p>
+    <p>Invite Anushka with Administrator permissions:</p>
     <label for="clientIdInput">Client ID</label>
     <input
       id="clientIdInput"
       type="text"
-      placeholder="e.g. 1234567890123456789"
+      value="1558027236291121163"
       inputmode="numeric"
       autocomplete="off"
     />

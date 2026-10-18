@@ -10,6 +10,7 @@ Strike ladder:
   4th  – Kick
   5th+ – Permanent ban
 """
+import os
 import discord
 from discord.ext import commands
 from datetime import datetime, timezone, timedelta
@@ -19,6 +20,14 @@ from pymongo import ReturnDocument
 
 from utils.db import warns_col, servers_col
 from utils.checks import is_moderator
+
+# Encryption is optional — gracefully skip if ENCRYPTION_KEY is not set
+_ENCRYPT = bool(os.getenv("ENCRYPTION_KEY"))
+if _ENCRYPT:
+    from utils.crypto import encrypt as _enc, decrypt as _dec
+else:
+    def _enc(v): return v   # noqa: E731
+    def _dec(v): return v   # noqa: E731
 
 
 class AutoMod(commands.Cog):
@@ -39,15 +48,20 @@ class AutoMod(commands.Cog):
                              timestamp=datetime.now(timezone.utc))
 
     async def _add_strike(self, guild_id: int, user_id: int, reason: str) -> int:
-        """Increment and return the user's current strike count."""
+        """Increment and return the user's current strike count.
+        Reason strings are AES-256-GCM encrypted before storage so MongoDB
+        never holds plaintext moderation data.
+        """
+        encrypted_reason = _enc(reason)   # no-op if ENCRYPTION_KEY not set
         doc = await warns_col.find_one_and_update(
             {"guild_id": guild_id, "user_id": user_id},
             {
                 "$inc": {"strikes": 1},
                 "$push": {
                     "history": {
-                        "reason": reason,
-                        "issued_at": self._utcnow()
+                        "reason": encrypted_reason,
+                        "issued_at": self._utcnow(),
+                        "encrypted": _ENCRYPT,
                     }
                 },
                 "$setOnInsert": {"created_at": self._utcnow()},
@@ -171,7 +185,15 @@ class AutoMod(commands.Cog):
                                                     f"{member.mention} has no strikes."))
 
         history = doc.get("history", [])
-        lines = [f"`{i+1}.` {h['reason']} — <t:{int(h['issued_at'].timestamp())}:R>"
+        def _safe_reason(h: dict) -> str:
+            raw = h.get("reason", "—")
+            if h.get("encrypted"):
+                try:
+                    return _dec(raw)
+                except Exception:
+                    return "[decryption error]"
+            return raw
+        lines = [f"`{i+1}.` {_safe_reason(h)} — <t:{int(h['issued_at'].timestamp())}:R>"
                  for i, h in enumerate(history[-10:])]  # last 10
 
         embed = self._embed(discord.Color.orange(), f"⚠️ Strikes for {member}",

@@ -15,6 +15,7 @@ from pathlib import Path
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from aiohttp import web
 
 # ── environment ────────────────────────────────────────────────────────────────
 load_dotenv()
@@ -42,10 +43,10 @@ intents.voice_states     = True   # Required for music commands
 
 # ── bot subclass ───────────────────────────────────────────────────────────────
 class Codex(commands.Bot):
-    def __init__(self):
+    def __init__(self, intents_override=None):
         super().__init__(
             command_prefix=commands.when_mentioned_or(PREFIX),
-            intents=intents,
+            intents=intents_override or intents,
             case_insensitive=True,
             help_command=None,          # Replaced by custom help below
             strip_after_prefix=True,
@@ -148,13 +149,55 @@ async def help_cmd(ctx: commands.Context, *, query: str = None):
     await ctx.send(embed=embed)
 
 
+# ── optional health check server for cloud hosting (Render, Railway, etc.) ────
+async def start_health_server():
+    port_str = os.getenv("PORT")
+    if not port_str:
+        return
+    try:
+        port = int(port_str)
+        app = web.Application()
+
+        async def health_handler(request):
+            return web.json_response({
+                "status": "online",
+                "bot": "Anushka",
+                "uptime": "active"
+            })
+
+        app.router.add_get("/", health_handler)
+        app.router.add_get("/health", health_handler)
+
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "0.0.0.0", port)
+        await site.start()
+        log.info("Cloud health server listening on port %d", port)
+    except Exception as e:
+        log.warning("Could not start cloud health server on port %s: %s", port_str, e)
+
+
 # ── entrypoint ────────────────────────────────────────────────────────────────
 async def main():
-    bot = Codex()
-    bot.add_command(help_cmd)
-    async with bot:
-        await bot.start(TOKEN)
+    await start_health_server()
+    try:
+        bot = Codex()
+        bot.add_command(help_cmd)
+        async with bot:
+            await bot.start(TOKEN)
+    except discord.errors.PrivilegedIntentsRequired:
+        log.warning(
+            "Privileged Intents (Server Members / Message Content) are not enabled in Discord Developer Portal.\n"
+            "Falling back to default intents so bot remains online! Please enable them in Developer Portal -> Bot -> Privileged Gateway Intents."
+        )
+        safe_intents = discord.Intents.default()
+        fallback_bot = Codex(intents_override=safe_intents)
+        fallback_bot.add_command(help_cmd)
+        async with fallback_bot:
+            await fallback_bot.start(TOKEN)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+

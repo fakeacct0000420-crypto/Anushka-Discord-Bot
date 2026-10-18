@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: anushka-discord-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python core.py
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: PREFIX
+        value: "!"
+      - key: PORT
+        value: "10000"
