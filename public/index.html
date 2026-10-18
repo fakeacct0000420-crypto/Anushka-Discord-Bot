@@ -58,14 +58,18 @@
       padding: 5rem 0 3.5rem;
     }
     .avatar {
-      width: 88px; height: 88px;
+      width: 96px; height: 96px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #ec4899);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.4rem;
+      overflow: hidden;
       margin: 0 auto 1.5rem;
+      border: 3px solid var(--accent);
       box-shadow: 0 0 40px rgba(124,107,255,0.45);
       animation: pulse-glow 3s ease-in-out infinite;
+    }
+    .avatar img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
     }
     @keyframes pulse-glow {
       0%, 100% { box-shadow: 0 0 40px rgba(124,107,255,0.45); }
@@ -295,7 +299,9 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="avatar">🤖</div>
+    <div class="avatar">
+      <img src="/avatar.jpg" alt="Anushka" />
+    </div>
     <h1>Anushka</h1>
     <p>A fully autonomous Discord moderation bot — strike escalation, anti-nuke protection, music playback, and MongoDB-backed dynamic roles.</p>
     <span class="badge">Online &amp; Operational</span>

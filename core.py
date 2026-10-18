@@ -36,9 +36,12 @@ log = logging.getLogger("core")
 
 # ── intents ────────────────────────────────────────────────────────────────────
 intents = discord.Intents.default()
-intents.members          = True   # Required for member fetching in moderation / antinuke
-intents.message_content  = True   # Required to read command messages
-intents.voice_states     = True   # Required for music commands
+intents.voice_states = True   # Required for music commands
+
+# Privileged intents (only enable if turned ON in Discord Developer Portal)
+if os.getenv("ENABLE_PRIVILEGED_INTENTS", "false").lower() == "true":
+    intents.members         = True
+    intents.message_content = True
 
 
 # ── bot subclass ───────────────────────────────────────────────────────────────

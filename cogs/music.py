@@ -80,8 +80,11 @@ class Music(commands.Cog):
             return
         track = mq.queue.pop(0)
         mq.current = track
-        source = discord.FFmpegPCMAudio(track["url"], **FFMPEG_OPTS)
-        mq.voice_client.play(source, after=lambda _: self._play_next(guild_id))
+        try:
+            source = discord.FFmpegPCMAudio(track["url"], **FFMPEG_OPTS)
+            mq.voice_client.play(source, after=lambda _: self._play_next(guild_id))
+        except Exception:
+            self._play_next(guild_id)
 
     # ── commands ──────────────────────────────────────────────────────────
 
@@ -123,8 +126,14 @@ class Music(commands.Cog):
                                              f"Position: **{len(mq.queue)}**"))
         else:
             mq.current = track
-            source = discord.FFmpegPCMAudio(track["url"], **FFMPEG_OPTS)
-            vc.play(source, after=lambda _: self._play_next(ctx.guild.id))
+            try:
+                source = discord.FFmpegPCMAudio(track["url"], **FFMPEG_OPTS)
+                vc.play(source, after=lambda _: self._play_next(ctx.guild.id))
+            except Exception as e:
+                return await ctx.send(embed=self._embed(
+                    discord.Color.red(), "❌ Audio Error",
+                    f"Could not initialize audio playback: `{e}`\n(Ensure FFmpeg is installed and accessible on PATH)"
+                ))
             await ctx.send(embed=self._embed(discord.Color.green(), "🎵 Now Playing",
                                              f"[{track['title']}]({track['webpage_url']})\n"
                                              f"Requested by {ctx.author.mention}"))
